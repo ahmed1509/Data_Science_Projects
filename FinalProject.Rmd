@@ -1,0 +1,74 @@
+---
+title: "Final_Project"
+author: "Ahmed Farah"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#H0:My average daily screen time is less than or equal 2.
+#Ha:My average daily screen time exceeds the 2 hours recommended time.
+
+#Experts say adults should limit screen time to 2 hours. In this case, i will be using recommended limit time of 2 hours.
+
+$H0: p = 2.0$ $Ha:p > 2.0$
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+```
+
+```{r}
+library(readxl)
+ScreenTime <- read_excel("Documents/Data Science/ScreenTime.xlsx")
+graph1 <- ggplot(ScreenTime, aes(x=Day, y=ScreenTime))+geom_line() + geom_point()+ labs(title = "Daily Screen Time Over Two Weeks", x="Day", y="Screen Time (hours)")
+
+ggplotly(graph1)
+```
+
+#Each point on the line shows the screen time for a specific day
+
+#Histogram of screen time disribution
+
+
+```{r}
+graph2 <- ggplot(ScreenTime, aes(x=ScreenTime))+geom_histogram(binwidth = 0.5, fill="skyblue", color="black")+labs(title = "Distribution of Daily Scrreen Time", x="Screen Time (hours)", y="Frequency")
+
+ggplotly(graph2)
+```
+#The histogram will show the disribution of daily screentime, with each bar representing the frequency of screen time within  a certain range of hours.
+
+#boxplot
+
+```{r}
+graph3 <- ggplot(ScreenTime, aes(y = ScreenTime)) + geom_boxplot(fill="lightgreen", color="black")+ labs("Boxplot of Daily Screen Time", y="Screen Time (Hours)")
+
+ggplotly(graph3)
+
+```
+#no outliers for the Screen time data. Screen time is between 2.5 - 6.5
+
+One-sample t-test
+```{r}
+t.test(ScreenTime$ScreenTime, mu=2, alternative = "greater")
+```
+# We reject the null hypothesis because the average daily screen is signifacnly greater than the 2 hour limit suggested for screen time.
+
+
+#Two-sample t-test
+#H0:There is no significant difference between the average screen time on weekends and weekdays.
+
+#HA: The average screen time on weekends differs from weekdays.
+
+$H0: weekends = weekdays$ $Ha: weekends \ne weekdays$
+```{r}
+weekdays <- ScreenTime %>% filter(Day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+
+weekends <- ScreenTime %>% filter(Day %in% c("Saturday", "Sunday"))
+
+t.test(weekends$ScreenTime, weekdays$ScreenTime, alternative = "two.sided")
+```
+#With a p-value = 0.67 we fail to reject the null hypothesis. This proves that there is insuffienct evidence to support that average screen time on weekends differs significantly from weekdays.
